@@ -15,7 +15,6 @@ import (
 
 type (
 	joplinProvider interface {
-		WaitForLockRealised(ctx context.Context, waitFor time.Duration) (err error)
 		AcquireLock(ctx context.Context, id string) (err error)
 		ReleaseLock(ctx context.Context, id string) (err error)
 		ListNames(ctx context.Context, prefix *string) (list []string, err error)
@@ -47,23 +46,18 @@ func NewTodo(provider joplinProvider, appID string, noteID string, parentID stri
 	}
 }
 
-func (t *Todo) UpdateTodo(ctx context.Context) error {
-	err := t.provider.WaitForLockRealised(ctx, 30*time.Second)
-	if err != nil {
-		return fmt.Errorf("waitForLockRealised: %w", err)
-	}
-
-	err = t.provider.AcquireLock(ctx, t.appID)
-	if err != nil {
-		return fmt.Errorf("acquireLock: %w", err)
-	}
-
+func (t *Todo) UpdateTodo(ctx context.Context) (err error) {
 	defer func() {
 		err = t.provider.ReleaseLock(ctx, t.appID)
 		if err != nil {
 			slog.Default().Error("cannot realise lock", slog.String("err", err.Error()))
 		}
 	}()
+
+	err = t.provider.AcquireLock(ctx, t.appID)
+	if err != nil {
+		return fmt.Errorf("acquireLock: %w", err)
+	}
 
 	children, note, err := t.listChildren(ctx)
 	if err != nil {

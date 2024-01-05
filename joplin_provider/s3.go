@@ -19,6 +19,11 @@ type (
 
 var (
 	ErrOtherLockWasNotRealised = errors.New("other lock was not realised")
+
+	LockRecheckDuration     = 1 * time.Second
+	LockWaitAcquireDuration = 30 * time.Second
+
+	lockFilePrefix = "locks/"
 )
 
 func NewS3(client *s3client.S3Client) *S3 {
@@ -27,52 +32,50 @@ func NewS3(client *s3client.S3Client) *S3 {
 	}
 }
 
-// WaitForLockRealised wait for other locks realised
-func (s3 *S3) WaitForLockRealised(ctx context.Context, waitFor time.Duration) error {
-	ctx, cancel := context.WithTimeout(ctx, waitFor)
+// AcquireLock exclusive lock file
+// see https://joplinapp.org/help/dev/spec/sync_lock#acquiring-an-exclusive-lock
+func (s3 *S3) AcquireLock(ctx context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(ctx, LockWaitAcquireDuration)
 	defer cancel()
 
-	timer := time.NewTimer(0)
-	defer timer.Stop()
+	ticker := time.NewTicker(time.Nanosecond)
+	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			return ErrOtherLockWasNotRealised
-		case <-timer.C:
-
+		case <-ticker.C:
 		}
 
-		prefix := "locks/"
-		list, err := s3.client.ListNames(ctx, &prefix, nil)
+		list, err := s3.client.ListNames(ctx, &lockFilePrefix, nil)
 		if err != nil {
 			return fmt.Errorf("list: %w", err)
 		}
 
+		// no locks found, acquire and recheck
 		if len(list) == 0 {
-			break
+			file := entities.File{
+				Name: s3.lockFileName(id),
+				Raw:  []byte(fmt.Sprintf(`{"type":2,"clientType":1,"clientId":"%s"}`, id)),
+			}
+
+			err = s3.Put(ctx, file)
+			if err != nil {
+				return fmt.Errorf("put: %w", err)
+			}
+
+			continue
 		}
 
-		timer.Reset(1 * time.Second)
+		// current lock found, lock successfully acquired
+		if len(list) == 1 && list[0] == s3.lockFileName(id) {
+			return nil
+		}
+
+		// other locks found, wait for release
+		ticker.Reset(LockRecheckDuration)
 	}
-
-	return nil
-}
-
-// AcquireLock exclusive lock file
-// lock is exclusive, app set as joplin desktop
-func (s3 *S3) AcquireLock(ctx context.Context, id string) (err error) {
-	file := entities.File{
-		Name: s3.lockFileName(id),
-		Raw:  []byte(fmt.Sprintf(`{"type":2,"clientType":1,"clientId":"%s"}`, id)),
-	}
-
-	err = s3.Put(ctx, file)
-	if err != nil {
-		return fmt.Errorf("put: %w", err)
-	}
-
-	return nil
 }
 
 // ReleaseLock remove lock file
@@ -123,5 +126,5 @@ func (s3 *S3) Put(ctx context.Context, file entities.File) (err error) {
 }
 
 func (s3 *S3) lockFileName(id string) string {
-	return fmt.Sprintf("locks/2_1_%s.json", id)
+	return fmt.Sprintf("%s2_1_%s.json", lockFilePrefix, id)
 }
