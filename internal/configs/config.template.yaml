@@ -1,0 +1,19 @@
+is_debug: $IS_DEBUG
+
+# joplin uses uuid without hyphens
+# leave empty to pick random auto value
+app_id: $APP_ID
+
+# note id for auto update
+note_id: $NOTE_ID
+
+# parent id for list source data
+parent_id: $PARENT_ID
+
+# joplin s3 sync storage
+s3:
+  dsn: $S3_DSN
+  key: $S3_KEY
+  secret: $S3_SECRET
+  bucket: $S3_BUCKET
+  region: $S3_REGION
