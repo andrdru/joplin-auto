@@ -106,7 +106,7 @@ func initApp(boot *bootstrap, conf configs.Config, provider string) (err error) 
 	default:
 		return fmt.Errorf("%s: %w", provider, ErrProviderUnknown)
 
-	case "s3":
+	case entities.ProviderS3:
 		s3, err := s3client.NewS3Client(&s3client.Config{
 			Region:   conf.S3.Region,
 			Endpoint: conf.S3.Host,
@@ -121,7 +121,7 @@ func initApp(boot *bootstrap, conf configs.Config, provider string) (err error) 
 
 		s3provider = joplin_provider.NewS3(s3)
 
-	case "web_clipper":
+	case entities.ProviderWebClipper:
 		client := webClipperClient.NewWebClipper(conf.WebClipper.Host, conf.WebClipper.Token)
 		s3provider = joplin_provider.NewWebClipper(client)
 	}

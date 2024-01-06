@@ -71,5 +71,3 @@ networks:
   mynetwork:
     driver: bridge
     name: ${PROJECT_PREFIX}
-
-# joplin sync;
