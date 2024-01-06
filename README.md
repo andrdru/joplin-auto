@@ -1,12 +1,12 @@
 # Auto update joplin notify
 
-Joplin notify auto updater written in golang
-supported protocols: S3, web clipper API
+Joplin notify auto updater written in golang  
+Supported protocols: S3, web clipper API
 
 - automatically aggregate notes with markdown todo lists
 - prioritize tasks
 
-If you're looking for joplin s3 sync or web clipper api integration, see [joplin_provider](/joplin_provider) package
+If you're looking for joplin S3 sync or web clipper api integration, see [joplin_provider](/joplin_provider) package
 
 ## Note format
 
@@ -27,11 +27,9 @@ If you're looking for joplin s3 sync or web clipper api integration, see [joplin
 
 1) create joplin notebooks, add some notes in markdown todo format
 2) create joplin note for auto update
-3) pick notebook ID, note for auto update ID (from s3, API or backups)
+3) pick notebook ID, note for auto update ID (from S3, API or backups)
 
 ## Install
-
-Setup
 
 configure
 
@@ -50,6 +48,8 @@ go run . --provider=web_clipper
 ```
 
 ## Local env
+
+see [docker](/docker)
 
 run local env
 
