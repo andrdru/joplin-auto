@@ -17,3 +17,8 @@ s3:
   secret: $S3_SECRET
   bucket: $S3_BUCKET
   region: $S3_REGION
+
+# joplin web clipper api
+web_clipper:
+  host: $WEB_CLIPPER_HOST
+  token: $WEB_CLIPPER_TOKEN

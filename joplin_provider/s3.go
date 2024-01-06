@@ -17,6 +17,8 @@ type (
 	}
 )
 
+var _ provider = &S3{}
+
 var (
 	ErrOtherLockWasNotRealised = errors.New("other lock was not realised")
 
@@ -84,11 +86,11 @@ func (s3 *S3) ReleaseLock(ctx context.Context, id string) (err error) {
 }
 
 // ListNames list all files names
-func (s3 *S3) ListNames(ctx context.Context, prefix *string) (list []string, err error) {
+func (s3 *S3) ListNames(ctx context.Context) (list []string, err error) {
 	var startAfter *string
 
 	for {
-		tmp, err := s3.client.ListNames(ctx, prefix, startAfter)
+		tmp, err := s3.client.ListNames(ctx, nil, startAfter)
 		if err != nil {
 			return nil, fmt.Errorf("list: %w", err)
 		}
@@ -113,8 +115,9 @@ func (s3 *S3) Get(ctx context.Context, name string) (file entities.File, err err
 	}
 
 	return entities.File{
-		Name: ret.Name,
-		Raw:  ret.Data,
+		Provider: entities.ProviderS3,
+		Name:     ret.Name,
+		Raw:      ret.Data,
 	}, nil
 }
 
