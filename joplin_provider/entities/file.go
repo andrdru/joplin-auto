@@ -9,6 +9,8 @@ import (
 
 type (
 	File struct {
+		Provider string
+
 		Name string
 		Raw  []byte
 
@@ -18,11 +20,20 @@ type (
 	}
 )
 
+const (
+	ProviderS3         = "s3"
+	ProviderWebClipper = "web_clipper"
+)
+
 var (
 	ErrUnexpectedMetadata = errors.New("unexpected metadata")
 )
 
 func (f *File) SplitRaw() {
+	if f.Provider != ProviderS3 {
+		return
+	}
+
 	parts := bytes.Split(f.Raw, []byte("\n"))
 
 	f.Header = parts[0]
@@ -43,6 +54,10 @@ func (f *File) SplitRaw() {
 }
 
 func (f *File) FormatRaw() {
+	if f.Provider != ProviderS3 {
+		return
+	}
+
 	buf := bytes.NewBuffer(f.Header)
 	buf.WriteString("\n\n")
 	buf.Write(f.Data)
@@ -64,7 +79,7 @@ func (f *File) MetaData(name string) (data string) {
 			continue
 		}
 
-		return string(el[len(needle)-1:])
+		return string(el[len(needle):])
 	}
 
 	return ""
@@ -92,6 +107,10 @@ func (f *File) SetData(data []byte) error {
 	nowTime := time.Now().In(time.UTC).Format("2006-01-02T15:04:05.999Z07:00")
 
 	f.Data = data
+
+	if f.Provider != ProviderS3 {
+		return nil
+	}
 
 	if !f.SetMetaData("updated_time", nowTime) {
 		return fmt.Errorf("no updated_time: %w", ErrUnexpectedMetadata)

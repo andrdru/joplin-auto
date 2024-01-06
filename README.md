@@ -7,7 +7,7 @@ Keep your todo list clear
 - prioritize tasks
 
 
-If you're looking just for joplin s3 data integration, see [joplin_privider](/joplin_privider) package
+If you're looking for joplin s3 sync or web clipper api integration, see [joplin_privider](/joplin_privider) package
 
 ## Note format
 ```markdown
@@ -19,12 +19,13 @@ If you're looking just for joplin s3 data integration, see [joplin_privider](/jo
 ```
 
 ## Requirements
-- joplin sync with s3
+- joplin sync with S3
+- or web clipper API
 
 ## Prepare
-1) create few joplin notebook, add few notes
+1) create joplin notebooks, add some notes in markdown todo format
 2) create joplin note for auto update
-3) pick notebook ID, note for auto update ID (from s3 or joplin backups)
+3) pick notebook ID, note for auto update ID (from s3, API or backups)
 
 ## Install
 Setup
@@ -36,4 +37,21 @@ cp internal/config/config.template.yaml config.yaml
 run
 ``` shell
 go run .
+```
+
+``` shell
+go run . --provider=web_clipper
+```
+
+
+## Local env
+
+run local env
+```shell
+make up
+```
+
+stop local env
+```shell
+make up
 ```

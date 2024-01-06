@@ -1,0 +1,75 @@
+version: "3.9"
+
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2023-12-23T07-19-11Z
+  command: server --console-address ":9001" /data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: [ "CMD", "mc", "ready", "local" ]
+    interval: 10s
+    timeout: 10s
+    retries: 3
+
+services:
+  minio:
+    <<: *minio-common
+    hostname: minio
+    container_name: ${PROJECT_PREFIX}-storage
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "./data:/data"
+    networks:
+      mynetwork: { }
+
+  minio_init:
+    image: quay.io/minio/mc:latest
+    container_name: ${PROJECT_PREFIX}-storage-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/notes;
+      exit 0;"
+    networks:
+      mynetwork: { }
+
+# web clipper at http://localhost:8080/notes?token=api_token
+  joplin:
+    image: "joplin"
+    restart: always
+    container_name: ${PROJECT_PREFIX}-webclipper
+    depends_on:
+      minio:
+        condition: service_healthy
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ./joplin-conf.json:/joplin-conf.json
+    entrypoint: >
+      /bin/sh -c "
+      joplin config --import-file /joplin-conf.json;
+      while true; do joplin sync; sleep 60; done &
+      socat TCP-LISTEN:8080,fork TCP:127.0.0.1:41184 &
+      joplin server start"
+    ports:
+      - "8080:8080"
+    networks:
+      mynetwork: { }
+
+networks:
+  mynetwork:
+    driver: bridge
+    name: ${PROJECT_PREFIX}
+
+# joplin sync;

@@ -12,11 +12,12 @@ import (
 type (
 	// Config main config
 	Config struct {
-		IsDebug  bool   `yaml:"is_debug"`
-		AppID    string `yaml:"app_id"`
-		NoteID   string `yaml:"note_id"`
-		ParentID string `yaml:"parent_id"`
-		S3       S3     `yaml:"s3"`
+		IsDebug    bool       `yaml:"is_debug"`
+		AppID      string     `yaml:"app_id"`
+		NoteID     string     `yaml:"note_id"`
+		ParentID   string     `yaml:"parent_id"`
+		S3         S3         `yaml:"s3"`
+		WebClipper WebClipper `yaml:"web_clipper"`
 	}
 
 	S3 struct {
@@ -25,6 +26,11 @@ type (
 		Secret string `yaml:"secret"`
 		Bucket string `yaml:"bucket"`
 		Region string `yaml:"region"`
+	}
+
+	WebClipper struct {
+		Host  string `yaml:"host"`
+		Token string `yaml:"token"`
 	}
 )
 

@@ -17,7 +17,7 @@ type (
 	joplinProvider interface {
 		AcquireLock(ctx context.Context, id string) (err error)
 		ReleaseLock(ctx context.Context, id string) (err error)
-		ListNames(ctx context.Context, prefix *string) (list []string, err error)
+		ListNames(ctx context.Context) (list []string, err error)
 		Get(ctx context.Context, name string) (file entities.File, err error)
 		Put(ctx context.Context, file entities.File) (err error)
 	}
@@ -75,7 +75,7 @@ func (t *Todo) UpdateTodo(ctx context.Context) (err error) {
 }
 
 func (t *Todo) listChildren(ctx context.Context) (list []entities.File, note entities.File, err error) {
-	from, err := t.provider.ListNames(ctx, nil)
+	from, err := t.provider.ListNames(ctx)
 	if err != nil {
 		return nil, entities.File{}, fmt.Errorf("list: %w", err)
 	}
@@ -110,9 +110,7 @@ func (t *Todo) listChildren(ctx context.Context) (list []entities.File, note ent
 }
 
 func (t *Todo) isChild(file entities.File) bool {
-	sub := []byte("parent_id: " + t.parentID)
-
-	return bytes.Contains(file.Raw, sub)
+	return file.MetaData("parent_id") == t.parentID
 }
 
 func (t *Todo) formatTodoData(files []entities.File) (data []byte) {

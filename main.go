@@ -12,6 +12,7 @@ type (
 	flags struct {
 		isHelp     *bool
 		configPath *string
+		provider   *string
 	}
 )
 
@@ -31,7 +32,7 @@ func main() {
 
 	initLogger()
 
-	code := app.Run(slog.Default(), *f.configPath)
+	code := app.Run(slog.Default(), *f.configPath, *f.provider)
 
 	os.Exit(code)
 }
@@ -39,6 +40,7 @@ func main() {
 func initFlags() (fv flags) {
 	fv.isHelp = flag.Bool("help", false, "Print help and exit")
 	fv.configPath = flag.String("config", "config.yaml", "path to config.yml")
+	fv.provider = flag.String("provider", "s3", "joplin provider, one of: s3 | web_clipper")
 
 	flag.Parse()
 	return fv

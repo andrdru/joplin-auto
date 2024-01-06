@@ -1,0 +1,11 @@
+{
+  "api.token": "api_token",
+  "sync.interval": 0,
+  "sync.target": 8,
+  "sync.8.url": "http://minio:9000",
+  "sync.8.path": "notes",
+  "sync.8.username": "minioadmin",
+  "sync.8.password": "minioadmin",
+  "sync.8.region": "us-east-1",
+  "sync.8.forcePathStyle": "true"
+}
