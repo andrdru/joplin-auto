@@ -60,5 +60,5 @@ make up
 stop local env
 
 ```shell
-make up
+make down
 ```
