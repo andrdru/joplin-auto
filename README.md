@@ -34,7 +34,7 @@ If you're looking for joplin S3 sync or web clipper api integration, see [joplin
 configure
 
 ```shell
-cp internal/config/config.template.yaml config.yaml
+cp internal/configs/config.template.yaml config.yaml
 ```
 
 run

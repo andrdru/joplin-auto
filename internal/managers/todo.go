@@ -98,11 +98,12 @@ func (t *Todo) listChildren(ctx context.Context) (list []entities.File, note ent
 			continue
 		}
 
+		file.SplitRaw()
+
 		if !t.isChild(file) {
 			continue
 		}
 
-		file.SplitRaw()
 		list = append(list, file)
 	}
 
