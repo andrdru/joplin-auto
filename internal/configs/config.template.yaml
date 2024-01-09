@@ -12,7 +12,7 @@ parent_id: $PARENT_ID
 
 # joplin s3 sync storage
 s3:
-  dsn: $S3_DSN
+  host: $S3_HOST
   key: $S3_KEY
   secret: $S3_SECRET
   bucket: $S3_BUCKET
